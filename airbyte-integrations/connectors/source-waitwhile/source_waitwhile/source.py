@@ -7,7 +7,7 @@ from airbyte_cdk.sources import AbstractSource
 from airbyte_cdk.sources.streams import Stream
 from airbyte_cdk.sources.streams.http import HttpStream
 from airbyte_cdk.sources.streams.http.auth import TokenAuthenticator
-
+from datetime import datetime
 
 class WaitwhileStreamAvailability(HttpStream, ABC):
     url_base = "https://api.waitwhile.com/v2/"
@@ -399,7 +399,7 @@ class SourceWaitwhile(AbstractSource):
             Visits(authenticator=auth, start_date=start_date),
             LocationsAvailability(
                 authenticator=auth,
-                start_date=start_date,
+                start_date=datetime.today().strftime('%Y-%m-%d'),
                 location_ids=location_ids,
                 n_days_availability_horizon=n_days_availability_horizon
             ),

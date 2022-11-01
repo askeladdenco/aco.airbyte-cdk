@@ -23,9 +23,9 @@ connectionSpecification:
       default: "2022-10-12"
       pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
     n_days_availability_horizon:
-      title: N das availability horizon
+      title: N days availability horizon
       type: integer
-      description: N das availability horizon
+      description: N days availability horizon
       examples:
         - 30
-      default: 3
+      default: 30
