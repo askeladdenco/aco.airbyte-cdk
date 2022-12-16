@@ -22,20 +22,20 @@ import io.airbyte.integrations.source.jdbc.AbstractJdbcSource;
 import io.airbyte.integrations.source.jdbc.test.JdbcSourceAcceptanceTest;
 import io.airbyte.integrations.source.relationaldb.models.DbState;
 import io.airbyte.integrations.source.relationaldb.models.DbStreamState;
-import io.airbyte.protocol.models.AirbyteCatalog;
-import io.airbyte.protocol.models.AirbyteConnectionStatus;
-import io.airbyte.protocol.models.AirbyteMessage;
-import io.airbyte.protocol.models.AirbyteMessage.Type;
-import io.airbyte.protocol.models.AirbyteRecordMessage;
-import io.airbyte.protocol.models.AirbyteStateMessage;
-import io.airbyte.protocol.models.AirbyteStateMessage.AirbyteStateType;
-import io.airbyte.protocol.models.CatalogHelpers;
-import io.airbyte.protocol.models.ConfiguredAirbyteCatalog;
-import io.airbyte.protocol.models.ConnectorSpecification;
-import io.airbyte.protocol.models.DestinationSyncMode;
+import io.airbyte.protocol.models.v0.AirbyteCatalog;
+import io.airbyte.protocol.models.v0.AirbyteConnectionStatus;
+import io.airbyte.protocol.models.v0.AirbyteMessage;
+import io.airbyte.protocol.models.v0.AirbyteMessage.Type;
+import io.airbyte.protocol.models.v0.AirbyteRecordMessage;
+import io.airbyte.protocol.models.v0.AirbyteStateMessage;
+import io.airbyte.protocol.models.v0.AirbyteStateMessage.AirbyteStateType;
+import io.airbyte.protocol.models.v0.CatalogHelpers;
+import io.airbyte.protocol.models.v0.ConfiguredAirbyteCatalog;
+import io.airbyte.protocol.models.v0.ConnectorSpecification;
+import io.airbyte.protocol.models.v0.DestinationSyncMode;
 import io.airbyte.protocol.models.Field;
 import io.airbyte.protocol.models.JsonSchemaType;
-import io.airbyte.protocol.models.SyncMode;
+import io.airbyte.protocol.models.v0.SyncMode;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -74,12 +74,14 @@ class OracleJdbcSourceAcceptanceTest extends JdbcSourceAcceptanceTest {
     TABLE_NAME_WITH_SPACES = "ID AND NAME";
     TABLE_NAME_WITHOUT_PK = "ID_AND_NAME_WITHOUT_PK";
     TABLE_NAME_COMPOSITE_PK = "FULL_NAME_COMPOSITE_PK";
+    TABLE_NAME_AND_TIMESTAMP = "NAME_AND_TIMESTAMP";
     COL_ID = "ID";
     COL_NAME = "NAME";
     COL_UPDATED_AT = "UPDATED_AT";
     COL_FIRST_NAME = "FIRST_NAME";
     COL_LAST_NAME = "LAST_NAME";
     COL_LAST_NAME_WITH_SPACE = "LAST NAME";
+    COL_TIMESTAMP = "TIMESTAMP";
     ID_VALUE_1 = new BigDecimal(1);
     ID_VALUE_2 = new BigDecimal(2);
     ID_VALUE_3 = new BigDecimal(3);
@@ -89,6 +91,7 @@ class OracleJdbcSourceAcceptanceTest extends JdbcSourceAcceptanceTest {
     INSERT_TABLE_WITHOUT_CURSOR_TYPE_QUERY = "INSERT INTO %s VALUES(to_clob('clob data'))";
     CREATE_TABLE_WITH_NULLABLE_CURSOR_TYPE_QUERY = "CREATE TABLE %s (%s VARCHAR(20))";
     INSERT_TABLE_WITH_NULLABLE_CURSOR_TYPE_QUERY = "INSERT INTO %s VALUES('Hello world :)')";
+    INSERT_TABLE_NAME_AND_TIMESTAMP_QUERY = "INSERT INTO %s (name, timestamp) VALUES ('%s', TO_TIMESTAMP('%s', 'YYYY-MM-DD HH24:MI:SS'))";
 
     ORACLE_DB = new AirbyteOracleTestContainer()
         .withEnv("NLS_DATE_FORMAT", "YYYY-MM-DD")
@@ -282,7 +285,8 @@ class OracleJdbcSourceAcceptanceTest extends JdbcSourceAcceptanceTest {
                     .withStreamName(streamName)
                     .withStreamNamespace(namespace)
                     .withCursorField(ImmutableList.of(COL_ID))
-                    .withCursor("5")))))));
+                    .withCursor("5")
+                    .withCursorRecordCount(1L)))))));
 
     setEmittedAtToNull(actualMessagesSecondSync);
 

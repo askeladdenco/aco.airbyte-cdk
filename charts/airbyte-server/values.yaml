@@ -74,6 +74,10 @@ image:
 ##
 podAnnotations: {}
 
+##  podLabels [object] Add extra labels to the server pod
+##
+podLabels: {}
+
 ##  containerSecurityContext Security context for the container
 ## Examples:
 ## containerSecurityContext:
@@ -139,6 +143,7 @@ resources:
 service:
   type: ClusterIP
   port: 8001
+  annotations: {}
 
 ##  nodeSelector [object] Node labels for pod assignment
 ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
