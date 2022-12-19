@@ -8,14 +8,14 @@ definitions:
     url_base: "{{ config['graphql_endpoint'] }}"
     http_method: "POST"
     authenticator:
-      type: "BearerAuthenticator"
-      api_token: "" #insert token here
-      # type: "OAuthAuthenticator"
-      # token_refresh_endpoint: "{{ config['token_refresh_endpoint'] }}"
-      # client_id: "{{ config['client_id'] }}"
-      # client_secret: "{{ config['client_secret'] }}"
-      # refresh_token: ""
-      # grant_type: "client_credentials"
+      type: "OAuthAuthenticator"
+      token_refresh_endpoint: "{{ config['token_refresh_endpoint'] }}"
+      client_id: "{{ config['client_id'] }}"
+      client_secret: "{{ config['client_secret'] }}"
+      refresh_token: ""
+      refresh_request_body: 
+        audience: "{{ config['graphql_endpoint'] }}"
+      grant_type: "client_credentials"
     request_options_provider:
       request_body_json:
         query: "{{ config['graphql_query'] }}"
