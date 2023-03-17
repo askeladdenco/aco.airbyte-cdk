@@ -13,10 +13,10 @@ from airbyte_cdk.sources import AbstractSource
 from airbyte_cdk.sources.streams import Stream
 from airbyte_cdk.sources.streams.http import HttpStream
 
-from .streams import DentclinicClinicIdsStream, DentclinicStaticStream, DentclinicIncrementalStream
+from .streams import DentclinicClinicIdsStream, DentclinicStaticStream, DentclinicIncrementalStream, DentclinicIncrementalBookingStream
 
 
-class BookingsFr(DentclinicIncrementalStream):
+class BookingsFr(DentclinicIncrementalBookingStream):
     primary_key = "Id"
     endpoint_data_path = ['soap:Envelope', 'soap:Body', 'GetBookingsResponse',
                           'GetBookingsResult', 'BookingModel']
@@ -37,7 +37,7 @@ class BookingsFr(DentclinicIncrementalStream):
         return "POST"
 
 
-class Bookings(DentclinicIncrementalStream):
+class Bookings(DentclinicIncrementalBookingStream):
     state_checkpoint_interval = 1
     primary_key = "Id"
     endpoint_data_path = ['soap:Envelope', 'soap:Body', 'GetBookingsResponse',
