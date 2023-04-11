@@ -25,8 +25,6 @@ class Nettbutikk24Stream(HttpStream, ABC):
     Each stream should extend this class (or another abstract subclass of it) to specify behavior unique to that stream.
     """
 
-    # url_base = "https://brewshop.no/api/v1/"
-
     def __init__(self, config: Mapping[str, Any], flat: bool = False, **kwargs):
         super().__init__()
         self.access_token = config.get("access_token")
@@ -78,10 +76,11 @@ class Nettbutikk24Stream(HttpStream, ABC):
         :return an iterable containing each record in the response
         """
 
-        if response.status_code == 404:
+        if response.status_code != 200:
             yield from []
 
-        yield from response.json().get("data", [])
+        else:
+            yield from response.json().get("data", [])
 
     def update_uri_params(self, next_page_token: Mapping[str, Any] = None, stream_state: Mapping[str, Any] = None):
         offset = next_page_token.get("offset", 0) if next_page_token else 0
@@ -92,6 +91,58 @@ class Nettbutikk24Stream(HttpStream, ABC):
                 "since": stream_since
             }
         )
+
+
+class IncrementalNettbutikk24CustomerStream(Nettbutikk24Stream, ABC):
+    state_checkpoint_interval = 1
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.customer_id = 1000
+
+    @property
+    def raise_on_http_errors(self) -> bool:
+        """
+        Override if needed. If set to False, allows opting-out of raising HTTP code exception.
+        """
+        return False
+
+    def request_params(
+            self, stream_state: Mapping[str, Any], stream_slice: Mapping[str, any] = None, next_page_token: Mapping[str, Any] = None
+    ) -> MutableMapping[str, Any]:
+        self.customer_id = max(stream_state.get('customer_id', 0), self.customer_id)
+        return {"access_token": self.access_token, "flat": self.flat}
+
+    def next_page_token(self, response: requests.Response) -> Optional[Mapping[str, Any]]:
+        """
+        :param response: the most recent response from the API
+        :return If there is another page in the result, a mapping (e.g: dict) containing information needed to query the next page in the response.
+                If there are no more pages in the result, return None.
+        """
+
+        if response.status_code == 200:
+            self.customer_id += 1
+            return {"customer_id": self.customer_id}
+
+        return None
+
+    @property
+    def cursor_field(self) -> str:
+        """
+        Override to return the cursor field used by this stream e.g: an API entity might always use created_at as the cursor field. This is
+        usually id or date based. This field's presence tells the framework this in an incremental stream. Required for incremental.
+
+        :return str: The name of the cursor field.
+        """
+
+        return "id"
+
+    def get_updated_state(self, current_stream_state: MutableMapping[str, Any], latest_record: Mapping[str, Any]) -> Mapping[str, Any]:
+        latest_record_id = int(latest_record.get(self.cursor_field, '0'))
+        stream_state = int(current_stream_state.get(self.cursor_field, '0'))
+        new_stream_state = max(latest_record_id, stream_state)
+
+        return {self.cursor_field: new_stream_state}
 
 
 class IncrementalNettbutikk24Stream(Nettbutikk24Stream, ABC):
@@ -126,10 +177,17 @@ class IncrementalNettbutikk24Stream(Nettbutikk24Stream, ABC):
         return {self.cursor_field: new_stream_state}
 
 
-class Products(IncrementalNettbutikk24Stream):
+class Customers(IncrementalNettbutikk24CustomerStream):
     primary_key = "id"
 
-    # self.flat = False
+    def path(
+            self, stream_state: Mapping[str, Any] = None, stream_slice: Mapping[str, Any] = None, next_page_token: Mapping[str, Any] = None
+    ) -> str:
+        return f"customers/{self.customer_id}"
+
+
+class Products(IncrementalNettbutikk24Stream):
+    primary_key = "id"
 
     def path(
             self, stream_state: Mapping[str, Any] = None, stream_slice: Mapping[str, Any] = None, next_page_token: Mapping[str, Any] = None
@@ -138,10 +196,9 @@ class Products(IncrementalNettbutikk24Stream):
         self.uri_params.update({"limit": 10000})
         return "products/{limit}/{offset}/{since}".format_map(self.uri_params)
 
+
 class Products_Flatted(IncrementalNettbutikk24Stream):
     primary_key = "id"
-
-    # self.flat = False
 
     def path(
             self, stream_state: Mapping[str, Any] = None, stream_slice: Mapping[str, Any] = None, next_page_token: Mapping[str, Any] = None
@@ -160,6 +217,7 @@ class Orders(IncrementalNettbutikk24Stream):
         self.update_uri_params(next_page_token, stream_state)
         return "orders/{limit}/{offset}/{since}".format_map(self.uri_params)
 
+
 class SourceNettbutikk24(AbstractSource):
     def check_connection(self, logger, config) -> Tuple[bool, any]:
         """
@@ -176,4 +234,9 @@ class SourceNettbutikk24(AbstractSource):
         """
         :param config: A Mapping of the user input configuration as defined in the connector spec.
         """
-        return [Orders(config=config, flat = True), Products(config=config, flat = False), Products_Flatted(config=config, flat = True)]
+        return [
+            Orders(config=config, flat=True),
+            Products(config=config, flat=False),
+            Products_Flatted(config=config, flat=True),
+            Customers(config=config, flat=True),
+        ]
