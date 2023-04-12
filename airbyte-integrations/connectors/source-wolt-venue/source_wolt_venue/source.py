@@ -45,6 +45,9 @@ class WoltVenueStream(HttpStream, ABC):
         expires_in = response_data.get("expires_in")
         self.access_token_expires_at = pendulum.now().add(seconds=expires_in)
         self.access_token = response_data.get("access_token")
+        print("=" * 100)
+        print("The Access token updated")
+        print("=" * 100)
 
     def next_page_token(self, response: requests.Response) -> Optional[Mapping[str, Any]]:
         """
@@ -71,7 +74,8 @@ class WoltVenueStream(HttpStream, ABC):
     def request_headers(
             self, stream_state: Mapping[str, Any], stream_slice: Mapping[str, Any] = None, next_page_token: Mapping[str, Any] = None
     ) -> Mapping[str, Any]:
-        if pendulum.now() >= self.access_token_expires_at:
+        minutes_to_expire = (self.access_token_expires_at - pendulum.now()).minutes
+        if minutes_to_expire <= 5:
             self.update_access_token()
         return {"Authorization": f"Bearer {self.access_token}"}
 
@@ -85,8 +89,6 @@ class WoltVenueStream(HttpStream, ABC):
 
         end_ts = pendulum.parse(start_time).add(days=7).format("YYYY-MM-DDTHH:00:00")
         end_time = min(str(end_ts), str(self.stop_date))
-
-
 
         params = {
             "start_time": start_time,
