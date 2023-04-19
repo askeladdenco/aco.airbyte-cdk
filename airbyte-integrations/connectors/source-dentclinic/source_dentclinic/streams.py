@@ -42,6 +42,7 @@ class DentclinicIncrementalStream(HttpStream, ABC):
         self.clinic_ids = self.get_clinic_ids()
         self.clinic_id = next(self.clinic_ids)
 
+
     def request_headers(
             self, stream_state: Mapping[str, Any], stream_slice: Mapping[str, Any] = None, next_page_token: Mapping[str, Any] = None
     ) -> Mapping[str, Any]:
@@ -53,6 +54,18 @@ class DentclinicIncrementalStream(HttpStream, ABC):
         :return str: The name of the cursor field.
         """
         return "DateFrom"
+    '''
+    
+    def should_retry(self, response: requests.Response) -> bool:
+        # if the connected Google account is not bounded with target Youtube account,
+        # we receive `401: UNAUTHENTICATED`
+        if response.status_code == 401:
+            setattr(self, "raise_on_http_errors", False)
+            return False
+        else:
+            return super().should_retry(response)
+    
+    '''
 
     @property
     def raise_on_http_errors(self) -> bool:
@@ -72,6 +85,9 @@ class DentclinicIncrementalStream(HttpStream, ABC):
         Unexpected but transient exceptions (connection timeout, DNS resolution failed, etc..) are retried by default.
         """
         print('Retry status_code:', response.status_code)
+        print(self.clinic_id, '----', self.cursor_start_date, '----', self.cursor_end_date)
+        if self.clinic_id is None:
+            return False
         return response.status_code == 429 or 500 <= response.status_code < 600
     
     @property
@@ -133,14 +149,14 @@ class DentclinicIncrementalStream(HttpStream, ABC):
             self.cursor_field, {}).get(self.clinic_id)
 
         print('Stream State', stream_state)
+        print(f'Fetching Interval - {self.clinic_id} : {start_ts} - {end_ts}')
 
         if clinic_state:
             state_ts = pendulum.parse(clinic_state)
             start_ts = max(start_ts, state_ts)
             end_ts = start_ts.add(days=self.fetch_interval_days)
 
-            print(
-                f'Fetching Interval - {self.clinic_id} : {start_ts} - {end_ts}')
+            
 
         return f"""<?xml version="1.0" encoding="utf-8"?>
         <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
@@ -233,6 +249,9 @@ class DentclinicIncrementalBookingStream(HttpStream, ABC):
         Unexpected but transient exceptions (connection timeout, DNS resolution failed, etc..) are retried by default.
         """
         print('Retry status_code:', response.status_code)
+        print(self.clinic_id, '----', self.cursor_start_date, '----', self.cursor_end_date)
+        if self.clinic_id is None:
+            return False
         return response.status_code == 429 or 500 <= response.status_code < 600
     @property
     def max_retries(self) -> Union[int, None]:
@@ -293,6 +312,7 @@ class DentclinicIncrementalBookingStream(HttpStream, ABC):
             self.cursor_field, {}).get(self.clinic_id)
 
         print('Stream State', stream_state)
+        print(f'Fetching Interval - {self.clinic_id} : {start_ts} - {end_ts}')
 
         if clinic_state:
             state_ts = pendulum.parse(clinic_state)
