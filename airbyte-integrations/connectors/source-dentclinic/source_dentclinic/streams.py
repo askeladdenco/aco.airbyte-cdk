@@ -1,6 +1,6 @@
 from __future__ import annotations
 from abc import ABC
-from typing import Any, Iterable, List, Mapping, MutableMapping, Optional, Tuple, Iterator
+from typing import Any, Iterable, List, Mapping, MutableMapping, Optional, Tuple, Iterator,Union
 import requests
 import pendulum
 import xmltodict
@@ -71,7 +71,12 @@ class DentclinicIncrementalStream(HttpStream, ABC):
 
         Unexpected but transient exceptions (connection timeout, DNS resolution failed, etc..) are retried by default.
         """
-        return response.status_code == 429 or 501 <= response.status_code < 600
+        print('Retry status_code:', response.status_code)
+        return response.status_code == 429 or 500 <= response.status_code < 600
+    
+    @property
+    def max_retries(self) -> Union[int, None]:
+        return 10
 
     def get_clinic_ids(self) -> Iterator[str]:
         payload_clinics = f"""<?xml version="1.0" encoding="utf-8"?>
@@ -153,7 +158,7 @@ class DentclinicIncrementalStream(HttpStream, ABC):
         """
         :return an iterable containing each record in the response
         """
-
+        print('Response status_code:', response.status_code)
         path = self.endpoint_data_path
         data = xmltodict.parse(response.text).copy()
         for key in path:
@@ -227,7 +232,11 @@ class DentclinicIncrementalBookingStream(HttpStream, ABC):
 
         Unexpected but transient exceptions (connection timeout, DNS resolution failed, etc..) are retried by default.
         """
-        return response.status_code == 429 or 501 <= response.status_code < 600
+        print('Retry status_code:', response.status_code)
+        return response.status_code == 429 or 500 <= response.status_code < 600
+    @property
+    def max_retries(self) -> Union[int, None]:
+        return 10
 
     def get_clinic_ids(self) -> Iterator[str]:
         payload_clinics = f"""<?xml version="1.0" encoding="utf-8"?>
@@ -310,7 +319,7 @@ class DentclinicIncrementalBookingStream(HttpStream, ABC):
         """
         :return an iterable containing each record in the response
         """
-
+        print('Response status_code:', response.status_code)
         path = self.endpoint_data_path
         data = xmltodict.parse(response.text).copy()
         for key in path:
