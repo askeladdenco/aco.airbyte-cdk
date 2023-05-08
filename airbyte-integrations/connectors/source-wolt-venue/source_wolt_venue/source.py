@@ -28,7 +28,7 @@ class WoltVenueStream(HttpStream, ABC):
 
         self.venues_mapping = venues_mapping
         self.venue_code, self.venue_name = next(self.venues_mapping)
-        self.last_max_resp_end_time = None
+        self.last_max_resp_end_time = self.start_date
 
     @property
     def cursor_field(self) -> str:
@@ -57,7 +57,10 @@ class WoltVenueStream(HttpStream, ABC):
         data = response.json()
         if 'purchases' in data:
             data = data.get('purchases')
-        max_resp_end_time = max([x[self.cursor_field] for x in data])
+        if len(data) == 0:
+            max_resp_end_time = pendulum.parse(self.last_max_resp_end_time).add(days=1).format("YYYY-MM-DDTHH:00:00")
+        else:
+            max_resp_end_time = max([x[self.cursor_field] for x in data])
 
         if max_resp_end_time == self.last_max_resp_end_time:
             return {}
@@ -110,7 +113,7 @@ class WoltVenueStream(HttpStream, ABC):
     def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
         data = response.json()
         data = sorted(data, key=lambda x: x["end_time"])
-        yield from [{**x, **{"venue": self.venue_name}} for x in data]
+        yield from [{**x, **{"venue": self.venue_name}} for x in data][:3]
 
     def get_updated_state(self, current_stream_state: MutableMapping[str, Any], latest_record: Mapping[str, Any]) -> Mapping[str, Any]:
         """
@@ -151,6 +154,7 @@ class Purchases(WoltVenueStream):
             "end_time": end_time,
             "statuses": "delivered,rejected",
         }
+
         return params
 
     def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
