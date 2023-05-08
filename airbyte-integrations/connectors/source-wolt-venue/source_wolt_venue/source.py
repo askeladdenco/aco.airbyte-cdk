@@ -113,7 +113,7 @@ class WoltVenueStream(HttpStream, ABC):
     def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
         data = response.json()
         data = sorted(data, key=lambda x: x["end_time"])
-        yield from [{**x, **{"venue": self.venue_name}} for x in data][:3]
+        yield from [{**x, **{"venue": self.venue_name}} for x in data]
 
     def get_updated_state(self, current_stream_state: MutableMapping[str, Any], latest_record: Mapping[str, Any]) -> Mapping[str, Any]:
         """
