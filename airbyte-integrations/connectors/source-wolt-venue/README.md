@@ -61,7 +61,7 @@ python main.py read --config secrets/config.json --catalog integration_tests/con
 First, make sure you build the latest Docker image:
 
 ```shell
-IMAGE_TAG="0.0.2"
+IMAGE_TAG="0.0.4"
 ```
 ```
 docker build . -t airbyte/source-wolt:$IMAGE_TAG  --platform linux/amd64
