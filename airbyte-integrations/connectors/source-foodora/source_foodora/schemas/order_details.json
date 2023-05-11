@@ -1,0 +1,164 @@
+{
+  "$schema" : "http://json-schema.org/draft-04/schema#",
+  "type" : "object",
+  "properties" : {
+    "identifier" : {
+      "type" : "string"
+    },
+    "order_id" : {
+      "type" : "string"
+    },
+    "global_vendor_code" : {
+      "type" : "string"
+    },
+    "vendor_name" : {
+      "type" : "string"
+    },
+    "order_timestamp" : {
+      "type" : "string",
+      "format" : "date-time",
+      "airbyte_type" : "timestamp_with_timezone"
+    },
+    "total" : {
+      "type" : "string"
+    },
+    "is_billable" : {
+      "type" : "string"
+    },
+    "payment" : {
+      "type" : "object",
+      "properties" : {
+        "total" : {
+          "type" : "string"
+        },
+        "discount" : {
+          "type" : "string"
+        },
+        "voucher" : {
+          "type" : "string"
+        },
+        "minimum_order_value_fee" : {
+          "type" : "string"
+        }
+      },
+      "required" : [
+        "total",
+        "discount",
+        "voucher",
+        "minimum_order_value_fee"
+      ]
+    },
+    "delivery" : {
+      "type" : "object",
+      "properties" : {
+        "provider" : {
+          "type" : "string"
+        },
+        "fee" : {
+          "type" : "string"
+        },
+        "postCode" : {
+          "type" : "string"
+        },
+        "city" : {
+          "type" : "string"
+        },
+        "address_text" : {
+          "type" : "string"
+        },
+        "packaging_charges" : {
+          "type" : "string"
+        }
+      },
+      "required" : [
+        "provider",
+        "fee",
+        "postCode",
+        "city",
+        "address_text",
+        "packaging_charges"
+      ]
+    },
+    "items" : {
+      "type" : "array",
+      "items" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "quantity" : {
+            "type" : "integer"
+          },
+          "unit_price" : {
+            "type" : "string"
+          },
+          "parent_name" : {
+            "type" : "string"
+          },
+          "options" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "id" : {
+                  "type" : "string"
+                },
+                "name" : {
+                  "type" : "string"
+                },
+                "type" : {
+                  "type" : "string"
+                },
+                "quantity" : {
+                  "type" : "integer"
+                },
+                "unit_price" : {
+                  "type" : "string"
+                }
+              },
+              "required" : [
+                "id",
+                "name",
+                "type",
+                "quantity",
+                "unit_price"
+              ]
+            }
+          }
+        },
+        "required" : [
+          "id",
+          "name",
+          "quantity",
+          "unit_price",
+          "parent_name",
+          "options"
+        ]
+      }
+    },
+    "version" : {
+      "type" : "integer"
+    },
+    "changed_at" : {
+      "type" : "null"
+    }
+  },
+  "required" : [
+    "identifier",
+    "order_id",
+    "global_vendor_code",
+    "vendor_name",
+    "order_timestamp",
+    "total",
+    "is_billable",
+    "payment",
+    "delivery",
+    "items",
+    "version",
+    "changed_at"
+  ]
+}
