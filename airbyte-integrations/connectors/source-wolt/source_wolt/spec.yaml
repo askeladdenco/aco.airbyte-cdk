@@ -14,7 +14,7 @@ connectionSpecification:
       airbyte_secret: true
     start_date:
       type: string
-      default: "2019-00-00T00:00:00Z"
+      default: "2019-01-01T00:00:00Z"
       format: date-time
       description: The date from which to start syncing data from Wolt
     lookback_window:
