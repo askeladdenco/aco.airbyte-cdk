@@ -26,7 +26,7 @@ The various TODOs are both implementation hints and steps - fulfilling all the T
 stream from a source. This pattern is the same one used by Airbyte internally to implement connectors.
 
 The approach here is not authoritative, and devs are free to use their own judgement.
-
+0
 There are additional required TODOs in the files within the integration_tests folder and the spec.yaml file.
 """
 
@@ -66,9 +66,9 @@ class PlandayStream(HttpStream, ABC):
         self.client_id = config["client_id"]
         self.sync_from = config["sync_from"]
         self.lookback_window = config.get("lookback_window")
-        delta_from_start = config.get("delta_from_start")
-        self.delta_from_start = delta_from_start if delta_from_start is not None and delta_from_start >= 0 else None
-        self.use_lookback = self.lookback_window is not None
+        self.delta_from_start = config.get(
+            "delta_from_start", -1) if not config.get("initial_sync") else -1
+        self.use_lookback = not config.get("initial_sync")
 
         self.uri_params = {
             "offset": 0,
@@ -298,6 +298,10 @@ class TimeAndCosts(IncrementalSubPlandayStream):
         yield from [{**cost, "departmentId": stream_slice['parent']['id']} for cost in costs]
 
 
+class TimeAndCostsFr(TimeAndCosts):
+    pass
+
+
 class EmployeeDetails(HttpSubStream, PlandayStream):
 
     primary_key = "id"
@@ -328,6 +332,10 @@ class Shifts(IncrementalPlandayStream):
         self, stream_state: Mapping[str, Any] = None, stream_slice: Mapping[str, Any] = None, next_page_token: Mapping[str, Any] = None
     ) -> str:
         return "scheduling/v1/shifts"
+
+
+class ShiftsFr(Shifts):
+    pass
 
 
 class ShiftTypes(PlandayStream):
@@ -363,4 +371,16 @@ class SourcePlanday(AbstractSource):
         """
         employees = Employees(config)
         departments = Departments(config)
-        return [departments, employees, EmployeeGroups(config), TimeAndCosts(parent=departments, config=config), Shifts(config), ShiftTypes(config), EmployeeDetails(parent=employees, config=config)]
+
+        return [departments,
+                employees,
+                EmployeeGroups(config),
+                TimeAndCosts(parent=departments, config=dict(
+                    config, lookback_window=config.get("lookback_window")-1, delta_from_start=0)),
+                TimeAndCostsFr(parent=departments, config=dict(
+                    config, initial_sync=False)),
+                Shifts(config=dict(config, lookback_window=config.get(
+                    "lookback_window")-1, delta_from_start=0)),
+                ShiftsFr(config=dict(config, initial_sync=False)),
+                ShiftTypes(config),
+                EmployeeDetails(parent=employees, config=config)]

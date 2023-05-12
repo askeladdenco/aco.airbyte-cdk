@@ -7,6 +7,7 @@ connectionSpecification:
     - client_id
     - refresh_token
     - sync_from
+    - lookback_window
   properties:
     # 'TODO: This schema defines the configuration required for the source. This usually involves metadata such as database and/or authentication information.':
     client_id:
@@ -17,6 +18,10 @@ connectionSpecification:
       type: string
       description: Planday refresh token
       airbyte_secret: true
+    initial_sync:
+      type: boolean
+      description: If set to true, sync_from will be used to determine the date to sync from. If set to false, the connector will use lookback window logic.
+      default: true
     sync_from:
       type: string
       description: Original date to sync [%Y-%m-%d]
@@ -25,10 +30,7 @@ connectionSpecification:
         - "%Y-%m-%d"
     lookback_window:
       type: integer
-      description: If set to a number, sync_from is irrelevant and data from today()-loocback_window days will be fetched. Only works with shifts and time_and_costs.
-    delta_from_start:
-      type: integer
-      description: If set to a number, only data up to and including start+delta_from_start days will be fetched. Will be ignored if <0.
-      default: -1
+      description: Sync data from today()-loocback_window days will be fetched. Only works with shifts and time_and_costs. Non-fr version of shifts and time_and_costs will have a lookback window of lookback_window-1.
+      default: 30
     
     
