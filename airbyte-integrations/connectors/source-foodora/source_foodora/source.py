@@ -99,6 +99,7 @@ class FoodoraStreamOrderDetails(HttpStream, ABC):
         self.start_date = config.get("initial_sync_date")
         self.access_token = None
         self.update_access_token()
+        self.access_token_ts = pendulum.now()
 
         self.orders = None
         self.current_order = None
@@ -123,12 +124,16 @@ class FoodoraStreamOrderDetails(HttpStream, ABC):
             json={"username": self.username, "password": self.password},
         )
         self.access_token = response.json().get('accessToken')
+        self.access_token_ts = pendulum.now()
 
     def request_headers(
             self, stream_state: Mapping[str, Any],
             stream_slice: Mapping[str, Any] = None,
             next_page_token: Mapping[str, Any] = None
     ) -> Mapping[str, Any]:
+        if (pendulum.now() - self.access_token_ts).in_minutes() >= 10:
+            self.update_access_token()
+
         return {"authorization": f"Bearer {self.access_token}"}
 
     def request_body_json(
