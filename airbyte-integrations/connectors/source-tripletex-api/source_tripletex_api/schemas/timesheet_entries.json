@@ -1,0 +1,350 @@
+{
+  "$schema" : "http://json-schema.org/draft-04/schema#",
+  "type" : "object",
+  "properties" : {
+    "id" : {
+      "type" : "integer"
+    },
+    "version" : {
+      "type" : "integer"
+    },
+    "url" : {
+      "type" : "string"
+    },
+    "project" : {
+      "type" : "object",
+      "properties" : {
+        "id" : {
+          "type" : "integer"
+        },
+        "name" : {
+          "type" : "string"
+        }
+      },
+      "required" : [
+        "id",
+        "name"
+      ]
+    },
+    "activity" : {
+      "type" : "object",
+      "properties" : {
+        "id" : {
+          "type" : "integer"
+        },
+        "version" : {
+          "type" : "integer"
+        },
+        "url" : {
+          "type" : "string"
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "number" : {
+          "type" : "string"
+        },
+        "description" : {
+          "type" : "string"
+        },
+        "activityType" : {
+          "type" : "string"
+        },
+        "isProjectActivity" : {
+          "type" : "boolean"
+        },
+        "isGeneral" : {
+          "type" : "boolean"
+        },
+        "isTask" : {
+          "type" : "boolean"
+        },
+        "isDisabled" : {
+          "type" : "boolean"
+        },
+        "isChargeable" : {
+          "type" : "boolean"
+        },
+        "rate" : {
+          "type" : "number"
+        },
+        "costPercentage" : {
+          "type" : "number"
+        },
+        "displayName" : {
+          "type" : "string"
+        }
+      },
+      "required" : [
+        "id",
+        "version",
+        "url",
+        "name",
+        "number",
+        "description",
+        "activityType",
+        "isProjectActivity",
+        "isGeneral",
+        "isTask",
+        "isDisabled",
+        "isChargeable",
+        "rate",
+        "costPercentage",
+        "displayName"
+      ]
+    },
+    "date" : {
+      "type" : "string"
+    },
+    "hours" : {
+      "type" : "number"
+    },
+    "chargeableHours" : {
+      "type" : "number"
+    },
+    "employee" : {
+      "type" : "object",
+      "properties" : {
+        "id" : {
+          "type" : "integer"
+        },
+        "version" : {
+          "type" : "integer"
+        },
+        "url" : {
+          "type" : "string"
+        },
+        "firstName" : {
+          "type" : "string"
+        },
+        "lastName" : {
+          "type" : "string"
+        },
+        "displayName" : {
+          "type" : "string"
+        },
+        "employeeNumber" : {
+          "type" : "string"
+        },
+        "dateOfBirth" : {
+          "type" : "string"
+        },
+        "email" : {
+          "type" : "string"
+        },
+        "phoneNumberMobileCountry" : {
+          "type" : "object",
+          "properties" : {
+            "id" : {
+              "type" : "integer"
+            },
+            "url" : {
+              "type" : "string"
+            }
+          },
+          "required" : [
+            "id",
+            "url"
+          ]
+        },
+        "phoneNumberMobile" : {
+          "type" : "string"
+        },
+        "phoneNumberHome" : {
+          "type" : "string"
+        },
+        "phoneNumberWork" : {
+          "type" : "string"
+        },
+        "nationalIdentityNumber" : {
+          "type" : "string"
+        },
+        "dnumber" : {
+          "type" : "string"
+        },
+        "bankAccountNumber" : {
+          "type" : "string"
+        },
+        "iban" : {
+          "type" : "string"
+        },
+        "bic" : {
+          "type" : "string"
+        },
+        "creditorBankCountryId" : {
+          "type" : "integer"
+        },
+        "usesAbroadPayment" : {
+          "type" : "boolean"
+        },
+        "allowInformationRegistration" : {
+          "type" : "boolean"
+        },
+        "isContact" : {
+          "type" : "boolean"
+        },
+        "comments" : {
+          "type" : "string"
+        },
+        "address" : {
+          "type" : "object",
+          "properties" : {
+            "id" : {
+              "type" : "integer"
+            },
+            "url" : {
+              "type" : "string"
+            }
+          },
+          "required" : [
+            "id",
+            "url"
+          ]
+        },
+        "department" : {
+          "type" : "object",
+          "properties" : {
+            "id" : {
+              "type" : "integer"
+            },
+            "url" : {
+              "type" : "string"
+            }
+          },
+          "required" : [
+            "id",
+            "url"
+          ]
+        },
+        "employments" : {
+          "type" : "array",
+          "items" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "integer"
+              },
+              "url" : {
+                "type" : "string"
+              }
+            },
+            "required" : [
+              "id",
+              "url"
+            ]
+          }
+        },
+        "employeeCategory" : {
+          "type" : "null"
+        },
+        "isAuthProjectOverviewURL" : {
+          "type" : "boolean"
+        },
+        "pictureId" : {
+          "type" : "integer"
+        }
+      },
+      "required" : [
+        "id",
+        "version",
+        "url",
+        "firstName",
+        "lastName",
+        "displayName",
+        "employeeNumber",
+        "dateOfBirth",
+        "email",
+        "phoneNumberMobileCountry",
+        "phoneNumberMobile",
+        "phoneNumberHome",
+        "phoneNumberWork",
+        "nationalIdentityNumber",
+        "dnumber",
+        "bankAccountNumber",
+        "iban",
+        "bic",
+        "creditorBankCountryId",
+        "usesAbroadPayment",
+        "allowInformationRegistration",
+        "isContact",
+        "comments",
+        "address",
+        "department",
+        "employments",
+        "employeeCategory",
+        "isAuthProjectOverviewURL",
+        "pictureId"
+      ]
+    },
+    "timeClocks" : {
+      "type" : "array",
+      "items" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer"
+          },
+          "url" : {
+            "type" : "string"
+          }
+        },
+        "required" : [
+          "id",
+          "url"
+        ]
+      }
+    },
+    "comment" : {
+      "type" : "string"
+    },
+    "locked" : {
+      "type" : "boolean"
+    },
+    "chargeable" : {
+      "type" : "boolean"
+    },
+    "invoice" : {
+      "type" : "object",
+      "properties" : {
+        "id" : {
+          "type" : "integer"
+        },
+        "url" : {
+          "type" : "string"
+        }
+      },
+      "required" : [
+        "id",
+        "url"
+      ]
+    },
+    "hourlyRate" : {
+      "type" : "number"
+    },
+    "hourlyCost" : {
+      "type" : "number"
+    },
+    "hourlyCostPercentage" : {
+      "type" : "number"
+    }
+  },
+  "required" : [
+    "id",
+    "version",
+    "url",
+    "project",
+    "activity",
+    "date",
+    "hours",
+    "chargeableHours",
+    "employee",
+    "timeClocks",
+    "comment",
+    "locked",
+    "chargeable",
+    "invoice",
+    "hourlyRate",
+    "hourlyCost",
+    "hourlyCostPercentage"
+  ]
+}

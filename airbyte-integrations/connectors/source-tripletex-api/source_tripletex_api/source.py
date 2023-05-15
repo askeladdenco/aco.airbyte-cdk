@@ -39,8 +39,7 @@ class TripletexApiStream(HttpStream, ABC):
 
         session_token = json.loads(response.text)["value"]["token"]
         username_and_pass = str.encode("0:{}".format(session_token))
-        self.session_token = base64.b64encode(
-            username_and_pass).decode("utf-8")
+        self.session_token = base64.b64encode(username_and_pass).decode("utf-8")
 
     def request_headers(
             self, stream_state: Mapping[str, Any], stream_slice: Mapping[str, Any] = None, next_page_token: Mapping[str, Any] = None
@@ -51,7 +50,6 @@ class TripletexApiStream(HttpStream, ABC):
         """
         :return an iterable containing each record in the response
         """
-        print(response.url)
         yield from response.json().get("values", [])
 
 
@@ -214,6 +212,31 @@ class BalanceSheet(DateRequiredStream):
         return "balanceSheet"
 
 
+class TimesheetEntries(DateRequiredStream):
+    primary_key = "id"
+
+    def request_params(
+            self, stream_state: Mapping[str, Any], stream_slice: Mapping[str, any] = None, next_page_token: Mapping[str, Any] = None
+    ) -> MutableMapping[str, Any]:
+        params = {
+            self.date_from_key_name: self.start_date,
+            self.date_to_key_name: pendulum.parse(self.start_date).add(days=30).format("YYYY-MM-DD"),
+            "count": 10000,
+            "from": 0,
+            "fields": '*,activity,employee,project(name,id)',
+        }
+
+        if next_page_token:
+            params.update(next_page_token)
+
+        return params
+
+    def path(
+            self, stream_state: Mapping[str, Any] = None, stream_slice: Mapping[str, Any] = None, next_page_token: Mapping[str, Any] = None
+    ) -> str:
+        return "timesheet/entry"
+
+
 class SourceTripletexApi(AbstractSource):
     def check_connection(self, logger, config) -> Tuple[bool, any]:
         """
@@ -228,5 +251,14 @@ class SourceTripletexApi(AbstractSource):
         :param config: A Mapping of the user input configuration as defined in the connector spec.
         """
 
-        return [Postings(config=config), Departments(config=config), Accounts(config=config), BalanceSheet(config=config),
-                Employee(config=config), Invoice(config=config), Payslip(config=config), SalaryType(config=config)]
+        return [
+            Postings(config=config),
+            Departments(config=config),
+            Accounts(config=config),
+            BalanceSheet(config=config),
+            Employee(config=config),
+            Invoice(config=config),
+            Payslip(config=config),
+            SalaryType(config=config),
+            TimesheetEntries(config=config)
+        ]
