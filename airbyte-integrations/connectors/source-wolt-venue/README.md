@@ -61,18 +61,18 @@ python main.py read --config secrets/config.json --catalog integration_tests/con
 First, make sure you build the latest Docker image:
 
 ```shell
-IMAGE_TAG="1.0.0"
+IMAGE_TAG="0.0.4"
 ```
 ```
-docker build . -t airbyte/source-wolt-venue:$IMAGE_TAG  --platform linux/amd64
+docker build . -t airbyte/source-wolt:$IMAGE_TAG  --platform linux/amd64
 
-docker tag airbyte/source-wolt-venue:$IMAGE_TAG askeladden/source-wolt-venue:$IMAGE_TAG
-docker push askeladden/source-wolt-venue:$IMAGE_TAG
+docker tag airbyte/source-wolt:$IMAGE_TAG askeladden/source-wolt:$IMAGE_TAG
+docker push askeladden/source-wolt:$IMAGE_TAG
 ```
 
 You can also build the connector image via Gradle:
 ```
-./gradlew :airbyte-integrations:connectors:source-wolt-venue:airbyteDocker
+./gradlew :airbyte-integrations:connectors:source-wolt:airbyteDocker
 ```
 When building via Gradle, the docker image name and tag, respectively, are the values of the `io.airbyte.name` and `io.airbyte.version` `LABEL`s in
 the Dockerfile.

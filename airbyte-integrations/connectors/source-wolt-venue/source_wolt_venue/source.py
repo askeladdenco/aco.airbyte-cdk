@@ -28,6 +28,7 @@ class WoltVenueStream(HttpStream, ABC):
 
         self.venues_mapping = venues_mapping
         self.venue_code, self.venue_name = next(self.venues_mapping)
+        self.last_max_resp_end_time = self.start_date
 
     @property
     def cursor_field(self) -> str:
@@ -54,9 +55,20 @@ class WoltVenueStream(HttpStream, ABC):
         """
 
         data = response.json()
-        max_resp_end_time = max([x['end_time'] for x in data])
+        if 'purchases' in data:
+            data = data.get('purchases')
+        if len(data) == 0:
+            max_resp_end_time = pendulum.parse(self.last_max_resp_end_time).add(days=1).format("YYYY-MM-DDTHH:00:00")
+        else:
+            max_resp_end_time = max([x[self.cursor_field] for x in data])
+
+        if max_resp_end_time == self.last_max_resp_end_time:
+            return {}
+        else:
+            self.last_max_resp_end_time = max_resp_end_time
+
         if max_resp_end_time < self.stop_date:
-            return {"end_time": max_resp_end_time}
+            return {self.cursor_field: max_resp_end_time}
         else:
             self.venue_code, self.venue_name = next(self.venues_mapping, (None, None))
 
@@ -75,24 +87,27 @@ class WoltVenueStream(HttpStream, ABC):
             self.update_access_token()
         return {"Authorization": f"Bearer {self.access_token}"}
 
-    def request_params(
-            self, stream_state: Mapping[str, Any], stream_slice: Mapping[str, any] = None, next_page_token: Mapping[str, Any] = None
-    ) -> MutableMapping[str, Any]:
-        max_resp_end_time = next_page_token.get('end_time', self.start_date) if next_page_token else self.start_date
+    def get_time_range(self, stream_state: Mapping[str, Any], next_page_token: Mapping[str, Any] = None):
+        max_resp_end_time = next_page_token.get('created_at', self.start_date) if next_page_token else self.start_date
         start_time = stream_state.get(self.venue_code, max_resp_end_time)
         # start_time - 10 hours to avoid missing data
         start_time = pendulum.parse(start_time).subtract(hours=10).format("YYYY-MM-DDTHH:00:00")
 
         end_ts = pendulum.parse(start_time).add(days=7).format("YYYY-MM-DDTHH:00:00")
         end_time = min(str(end_ts), str(self.stop_date))
+        return start_time, end_time
 
-
+    def request_params(
+            self, stream_state: Mapping[str, Any], stream_slice: Mapping[str, any] = None, next_page_token: Mapping[str, Any] = None
+    ) -> MutableMapping[str, Any]:
+        start_time, end_time = self.get_time_range(stream_state, next_page_token)
 
         params = {
             "start_time": start_time,
             "end_time": end_time,
             "interval": "P0DT1H",
         }
+
         return params
 
     def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
@@ -127,6 +142,34 @@ class OfflineMinutes(WoltVenueStream):
         return "offline-minutes"
 
 
+class Purchases(WoltVenueStream):
+    cursor_field = "created_at"
+
+    def request_params(
+            self, stream_state: Mapping[str, Any], stream_slice: Mapping[str, any] = None, next_page_token: Mapping[str, Any] = None
+    ) -> MutableMapping[str, Any]:
+        start_time, end_time = self.get_time_range(stream_state, next_page_token)
+        params = {
+            "start_time": start_time,
+            "end_time": end_time,
+            "statuses": "delivered,rejected",
+        }
+
+        return params
+
+    def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
+        data = response.json().get("purchases")
+        yield from data
+
+    def path(
+            self, stream_state: Mapping[str, Any] = None, stream_slice: Mapping[str, Any] = None, next_page_token: Mapping[str, Any] = None
+    ) -> str:
+        """
+        To define the path of the stream.
+        """
+        return "purchases"
+
+
 class SourceWoltVenue(AbstractSource):
     def check_connection(self, logger, config) -> Tuple[bool, any]:
         """
@@ -151,4 +194,7 @@ class SourceWoltVenue(AbstractSource):
             ("620ba4e460f7329be919d9c1", "TMG"),
             ("620ba7cde15dc14dbd1e5dbc", "Storo"),
         ]
-        return [OfflineMinutes(config=config, venues_mapping=iter(venues_mapping))]
+        return [
+            OfflineMinutes(config=config, venues_mapping=iter(venues_mapping)),
+            Purchases(config=config, venues_mapping=iter(venues_mapping)),
+        ]
