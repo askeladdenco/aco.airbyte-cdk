@@ -68,6 +68,7 @@ class MemcareStream(HttpStream, ABC):
             config.get('sync_from'), "%Y-%m-%d")
         self.sync_from = sync_from.replace(tzinfo=pytz.UTC)
         self.per = 100
+        self.total_responses = 0
         self.page = 1
         self.params = {
             "per": self.per,
@@ -89,7 +90,8 @@ class MemcareStream(HttpStream, ABC):
                 If there are no more pages in the result, return None.
         """
         total_responses = response.json().get('total_items')
-        if total_responses > self.page * self.per:
+        self.total_responses += len(response.json().get('data', []))
+        if total_responses > self.total_responses:
             self.page += 1
             return {'page': self.page}
         return None
@@ -120,6 +122,7 @@ class MemcareStream(HttpStream, ABC):
     ) -> Iterable[Optional[Mapping[str, Any]]]:
         for funeral_home in self.funeral_homes:
             self.page = 1
+            self.total_responses = 0
             yield {"funeral_home": funeral_home, "is_incremental": sync_mode == SyncMode.incremental}
 
 
@@ -147,7 +150,7 @@ class IncrementalMemcareStream(MemcareStream, ABC):
         print(current_stream_state)
         new_state = current_stream_state.copy()
         new_state.update({self.cursor_field+latest_record.get("funeral_home")
-                         : datetime.datetime.now().replace(tzinfo=pytz.UTC)})
+                         : latest_record.get(self.cursor_field)})
         return new_state
 
     def parse_response(self,
