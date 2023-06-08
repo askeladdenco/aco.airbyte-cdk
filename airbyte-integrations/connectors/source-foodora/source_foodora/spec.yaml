@@ -6,13 +6,8 @@ connectionSpecification:
   required:
     - username
     - password
-    - endpoint
+    - initial_sync_date
   properties:
-    endpoint:
-      type: string
-      description: URL endpoint of the Foodora API
-      airbyte_secret: false
-
     username:
       type: string
       description: Username used to retrieve data from the Foodora API.
@@ -22,3 +17,7 @@ connectionSpecification:
       type: string
       description: Password used to retrieve data from the Foodora API.
       airbyte_secret: true
+
+    initial_sync_date:
+      type: string
+      description: Initial sync date. YYYY-MM-DD. E.g. 2022-07-08
