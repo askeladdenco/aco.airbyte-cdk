@@ -7,6 +7,8 @@ connectionSpecification:
     - username
     - password
     - initial_sync_date
+    - lookback_window
+    - use_lookback_window
   properties:
     username:
       type: string
@@ -21,3 +23,13 @@ connectionSpecification:
     initial_sync_date:
       type: string
       description: Initial sync date. YYYY-MM-DD. E.g. 2022-07-08
+    
+    lookback_window:
+      type: integer
+      description: Number of days to look back for data. E.g. 30
+      default: 10
+    
+    use_lookback_window:
+      type: boolean
+      description: Whether to use lookback window or not. If false, initial_sync_date will be used.
+      default: false
