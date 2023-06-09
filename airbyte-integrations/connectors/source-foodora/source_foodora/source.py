@@ -197,6 +197,8 @@ class Orders(FoodoraOrdersStream):
         while start < stop:
             stop = min(start + delta, stop)
             yield start, stop
+            print("start", str(start))
+            print("stop", str(stop))
             start = stop
 
 
@@ -211,16 +213,21 @@ class OrderDetails(HttpSubStream, FoodoraOrdersStream):
         print("Next page token", next_page_token)
         print("Stream slice", stream_slice)
         query = "query GetOrderDetails($params: OrderReq!) {\n  orders {\n    order(input: $params) {\n      order {\n        orderId\n        placedTimestamp\n        status\n        globalEntityId\n        vendorId\n        vendorName\n        orderValue\n        billableStatus\n        delivery {\n          provider\n          location {\n            AddressText\n            city\n            district\n            postCode\n            __typename\n          }\n          __typename\n        }\n        items {\n          ...ItemFields\n          __typename\n        }\n        __typename\n      }\n      orderReceipt {\n        uploadedAt\n        __typename\n      }\n      orderStatuses {\n        status\n        timestamp\n        detail {\n          ... on Accepted {\n            estimatedDeliveryTime\n            __typename\n          }\n          ... on Cancelled {\n            owner\n            reason\n            __typename\n          }\n          ... on Delivered {\n            timestamp\n            __typename\n          }\n          __typename\n        }\n        __typename\n      }\n      billing {\n        billingStatus\n        estimatedVendorNetRevenue\n        taxTotalAmount\n        vendorPayout\n        payment {\n          cashAmountCollectedByVendor\n          paymentType\n          method\n          paymentFee\n          __typename\n        }\n        expense {\n          totalDiscountGross\n          jokerFeeGross\n          commissions {\n            grossAmount\n            rate\n            base\n            __typename\n          }\n          vendorCharges {\n            grossAmount\n            reason\n            __typename\n          }\n          __typename\n        }\n        revenue {\n          platformFundedDiscountGross\n          partnerFundedDiscountGross\n          containerChargesGross\n          minimumOrderValueGross\n          deliveryFeeGross\n          tipGross\n          taxCharge\n          vendorRefunds {\n            grossAmount\n            reason\n            __typename\n          }\n          __typename\n        }\n        __typename\n      }\n      previousVersions {\n        changeAt\n        reason\n        orderState {\n          orderValue\n          items {\n            ...ItemFields\n            __typename\n          }\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment ItemFields on Item {\n  id: productId\n  name\n  parentName\n  quantity\n  unitPrice\n  options {\n    id\n    name\n    quantity\n    type\n    unitPrice\n    __typename\n  }\n  __typename\n}"
-        pagination = {"pageSize": 50}
-        if next_page_token:
-            pagination.update({"pageToken": next_page_token})
-        return {"operationName": "GetOrderDetails",
+        order_id = stream_slice.get("parent", {}).get("orderId")
+        global_entity_id = stream_slice.get("parent", {}).get("globalEntityId")
+        vendor_id = stream_slice.get("parent", {}).get("vendorId")
+        placed_timestamp = stream_slice.get(
+            "parent", {}).get("placedTimestamp")
+        body = {"operationName": "GetOrderDetails",
                 "variables": {
-                    "params": {"orderId": "u5iq-4e4g",
+                    "params": {"orderId": order_id,
                                "GlobalVendorCode":
-                                   {"globalEntityId": "FO_NO", "vendorId": "u5iq"},
-                                   "placedTimestamp": "2023-06-06T09:20:52.000Z", "isBillingDataFlagEnabled": False}},
+                                   {"globalEntityId": global_entity_id,
+                                       "vendorId": vendor_id},
+                                   "placedTimestamp": placed_timestamp, "isBillingDataFlagEnabled": False}},
                 "query": query}
+        print(body)
+        return body
 
     def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
         print(response.url)
