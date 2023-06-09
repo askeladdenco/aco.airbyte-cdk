@@ -149,7 +149,6 @@ class Orders(FoodoraOrdersStream):
     ) -> Mapping[str, Any]:
         print("Next page token", next_page_token)
         print("Stream slice", stream_slice)
-        vendors = get_vendors()
         query = "query ListOrders($params: ListOrdersReq!) {\n  orders {\n    listOrders(input: $params) {\n      nextPageToken\n      resultTimestamp\n      orders {\n        ...OrderListingFields\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment OrderListingFields on OrderSummary {\n  orderId\n  globalEntityId\n  vendorId\n  vendorName\n  orderStatus\n  placedTimestamp\n  subtotal\n  billing {\n    commissionAmount\n    customerRefundGrossAmount\n    netRevenue\n    __typename\n  }\n  __typename\n}"
         pagination = {"pageSize": 50}
         if next_page_token:
@@ -211,7 +210,6 @@ class OrderDetails(HttpSubStream, FoodoraOrdersStream):
     ) -> Mapping[str, Any]:
         print("Next page token", next_page_token)
         print("Stream slice", stream_slice)
-        vendors = get_vendors()
         query = "query GetOrderDetails($params: OrderReq!) {\n  orders {\n    order(input: $params) {\n      order {\n        orderId\n        placedTimestamp\n        status\n        globalEntityId\n        vendorId\n        vendorName\n        orderValue\n        billableStatus\n        delivery {\n          provider\n          location {\n            AddressText\n            city\n            district\n            postCode\n            __typename\n          }\n          __typename\n        }\n        items {\n          ...ItemFields\n          __typename\n        }\n        __typename\n      }\n      orderReceipt {\n        uploadedAt\n        __typename\n      }\n      orderStatuses {\n        status\n        timestamp\n        detail {\n          ... on Accepted {\n            estimatedDeliveryTime\n            __typename\n          }\n          ... on Cancelled {\n            owner\n            reason\n            __typename\n          }\n          ... on Delivered {\n            timestamp\n            __typename\n          }\n          __typename\n        }\n        __typename\n      }\n      billing {\n        billingStatus\n        estimatedVendorNetRevenue\n        taxTotalAmount\n        vendorPayout\n        payment {\n          cashAmountCollectedByVendor\n          paymentType\n          method\n          paymentFee\n          __typename\n        }\n        expense {\n          totalDiscountGross\n          jokerFeeGross\n          commissions {\n            grossAmount\n            rate\n            base\n            __typename\n          }\n          vendorCharges {\n            grossAmount\n            reason\n            __typename\n          }\n          __typename\n        }\n        revenue {\n          platformFundedDiscountGross\n          partnerFundedDiscountGross\n          containerChargesGross\n          minimumOrderValueGross\n          deliveryFeeGross\n          tipGross\n          taxCharge\n          vendorRefunds {\n            grossAmount\n            reason\n            __typename\n          }\n          __typename\n        }\n        __typename\n      }\n      previousVersions {\n        changeAt\n        reason\n        orderState {\n          orderValue\n          items {\n            ...ItemFields\n            __typename\n          }\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment ItemFields on Item {\n  id: productId\n  name\n  parentName\n  quantity\n  unitPrice\n  options {\n    id\n    name\n    quantity\n    type\n    unitPrice\n    __typename\n  }\n  __typename\n}"
         pagination = {"pageSize": 50}
         if next_page_token:
@@ -230,6 +228,7 @@ class OrderDetails(HttpSubStream, FoodoraOrdersStream):
         yield data
 
     def next_page_token(self, response: requests.Response) -> Optional[Mapping[str, Any]]:
+        self.update_access_token()
         return None
 
 
