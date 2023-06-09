@@ -196,8 +196,6 @@ class Orders(FoodoraOrdersStream):
         while start < stop:
             stop = min(start + delta, stop)
             yield start, stop
-            print("start", str(start))
-            print("stop", str(stop))
             start = stop
 
 
