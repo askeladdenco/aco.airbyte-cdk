@@ -70,8 +70,7 @@ class FoodoraStream(HttpStream, ABC):
         to the default backoff behavior (e.g using an exponential algorithm).
         """
         self.update_access_token()
-        print("DENNE FUNKSJONEN HAR KJØRT!!!")
-        return float(0)
+        return float(60)
 
     def request_kwargs(
             self,
