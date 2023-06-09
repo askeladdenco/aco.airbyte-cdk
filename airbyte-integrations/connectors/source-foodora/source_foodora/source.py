@@ -4,7 +4,7 @@
 
 
 from abc import ABC, abstractmethod
-from typing import Any, Iterable, List, Mapping, MutableMapping, Optional, Tuple
+from typing import Any, Iterable, List, Mapping, MutableMapping, Optional, Tuple, Dict
 
 import requests
 import pendulum
@@ -13,6 +13,11 @@ from airbyte_cdk.sources.streams import Stream
 from airbyte_cdk.sources.streams.http import HttpStream, HttpSubStream
 from airbyte_cdk.sources.streams.http.auth import TokenAuthenticator
 from airbyte_cdk.models import SyncMode
+
+
+def convert_vendors(vendors: Dict[str, Dict[str, List[str]]]) -> list:
+    return ([{"global_entity_id": global_entity, "vendor_id": vendor} for global_entity in vendors for vendor in vendors[global_entity]["codes"]],
+            [{"globalEntityId": global_entity, "vendorId": vendor} for global_entity in vendors for vendor in vendors[global_entity]["codes"]])
 
 
 def get_vendors() -> list:
@@ -49,7 +54,7 @@ class FoodoraStream(HttpStream, ABC):
         self.start_date = config.get("initial_sync_date")
         self.use_lookback_window = config.get("use_lookback_window")
         self.lookback_window = config.get("lookback_window")
-        self.vendors = get_vendors()
+        self.vendors = None
         self.access_token = None
         self.access_token_exp = pendulum.now()
 
@@ -86,6 +91,10 @@ class FoodoraStream(HttpStream, ABC):
             json={"username": self.username, "password": self.password},
         )
         resp_json = response.json()
+        if self.vendors == None:
+            vendors = resp_json.get(
+                'accessTokenContent', {}).get('vendors', [])
+            self.vendors = convert_vendors(vendors)
         self.access_token = resp_json.get('accessToken')
         self.access_token_exp = pendulum.from_timestamp(
             resp_json.get("accessTokenContent", {}).get("exp", 0))
@@ -102,11 +111,11 @@ class FoodoraStream(HttpStream, ABC):
     ) -> MutableMapping[str, Any]:
         return {}
 
-    @property
+    @ property
     def http_method(self) -> str:
         return "POST"
 
-    @abstractmethod
+    @ abstractmethod
     def request_body_json(
             self, stream_state: Mapping[str, Any], stream_slice: Mapping[str, Any] = None, next_page_token: Mapping[str, Any] = None
     ) -> Mapping[str, Any]:
@@ -187,7 +196,7 @@ class Orders(FoodoraOrdersStream):
     def get_start_date_sync(self) -> pendulum.DateTime:
         return pendulum.today().subtract(days=self.lookback_window) if self.use_lookback_window else pendulum.parse(self.start_date)
 
-    @staticmethod
+    @ staticmethod
     def generate_date_intervals(start_date: pendulum.DateTime, frequency: int = 10):
         start = start_date
         delta = pendulum.duration(days=frequency)
