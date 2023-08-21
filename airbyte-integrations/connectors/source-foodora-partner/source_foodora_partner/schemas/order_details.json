@@ -1,0 +1,174 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "token": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "code": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "comments": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "createdAt": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "customer": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "delivery": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "discounts": {
+      "type": [
+        "null",
+        "array"
+      ]
+    },
+    "expeditionType": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "expiryDate": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "extraParameters": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "localInfo": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "payment": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "test": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "shortCode": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "preOrder": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "pickup": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "platformRestaurant": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "price": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "products": {
+      "type": [
+        "null",
+        "array"
+      ]
+    },
+    "corporateOrder": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "corporateTaxId": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "integrationInfo": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "mobileOrder": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "webOrder": {
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    "vouchers": {
+      "type": [
+        "null",
+        "array"
+      ]
+    },
+    "callbackUrls": {
+      "type": [
+        "null",
+        "object"
+      ]
+    },
+    "status": {
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    "reason": {
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  }
+}
