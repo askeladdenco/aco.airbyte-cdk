@@ -1,0 +1,17 @@
+documentationUrl: https://docsurl.com
+connectionSpecification:
+  $schema: http://json-schema.org/draft-07/schema#
+  title: Foodora Partner Spec
+  type: object
+  required:
+    - username
+    - password
+  properties:
+    username:
+      type: string
+      description: The username for login API authentication
+      default: 'eu-plugin-digg-pizza-as-001'
+    password:
+      type: string
+      description: The password for login API authentication
+      airbyte_secret: true

@@ -1,0 +1,25 @@
+data:
+  allowedHosts:
+    hosts:
+      - TODO # Please change to the hostname of the source.
+  registries:
+    oss:
+      enabled: false
+    cloud:
+      enabled: false
+  connectorSubtype: api
+  connectorType: source
+  definitionId: cd32f843-c5eb-4b84-9930-2c052142613a
+  dockerImageTag: 0.1.0
+  dockerRepository: airbyte/source-foodora-partner
+  githubIssueLabel: source-foodora-partner
+  icon: foodora-partner.svg
+  license: MIT
+  name: Foodora Partner
+  releaseDate: TODO
+  supportLevel: community
+  releaseStage: alpha
+  documentationUrl: https://docs.airbyte.com/integrations/sources/foodora-partner
+  tags:
+    - language:python
+metadataSpecVersion: "1.0"
