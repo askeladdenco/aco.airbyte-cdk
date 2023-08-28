@@ -222,10 +222,31 @@ class BalanceSheet(DateRequiredStream):
 class TimesheetEntries(TripletexPaginationStream):
     primary_key = "id"
 
+    fields = top_level_attributes = [
+        "date",
+        "hourlyCostPercentage",
+        "hours",
+        "chargeable",
+        "activity",
+        "project",
+        "employee",
+        "version",
+        "url",
+        "chargeableHours",
+        "hourlyCost",
+        "timeClocks",
+        "comment",
+        "id",
+        "invoice",
+        "locked",
+        "hourlyRate"
+    ]
+
     def __init__(self, parent: Employee, config: Mapping[str, Any]):
         super().__init__(config=config)
         self.parent = parent
         self.lookback = config.get("lookback_timesheet_entries", 0)
+        self.fields = ",".join(TimesheetEntries.fields)
 
     def path(
         self, stream_state: Mapping[str, Any] = None, stream_slice: Mapping[str, Any] = None, next_page_token: Mapping[str, Any] = None
@@ -238,7 +259,8 @@ class TimesheetEntries(TripletexPaginationStream):
         params = super().request_params(stream_state, stream_slice, next_page_token)
         params.update({"dateFrom": stream_slice.get("dateFrom"),
                        "dateTo": stream_slice.get("dateTo"),
-                       "employeeId": stream_slice.get("parent", {}).get("id")})
+                       "employeeId": stream_slice.get("parent", {}).get("id"),
+                       "fields": self.fields})
         return params
 
     def _get_slices(self):
