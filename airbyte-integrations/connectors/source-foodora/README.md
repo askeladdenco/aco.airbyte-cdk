@@ -130,3 +130,24 @@ You've checked out the repo, implemented a million dollar feature, and you're re
 1. Create a Pull Request.
 1. Pat yourself on the back for being an awesome contributor.
 1. Someone from Airbyte will take a look at your PR and iterate with you to merge it into master.
+
+
+
+
+
+
+```
+docker build . -t airbyte/source-foodora:dev
+```
+
+If you are on Apple M-chips (arm64), add `-- platform linux/amd64` tag at the end of the above command.
+
+```shell
+IMAGE_TAG="1.1.0"
+```
+
+```
+docker build . -t airbyte/source-foodora:$IMAGE_TAG  --platform linux/amd64
+
+docker tag airbyte/source-foodora:$IMAGE_TAG askeladden/source-foodora:$IMAGE_TAG
+docker push askeladden/source-foodora:$IMAGE_TAG

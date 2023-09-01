@@ -24,6 +24,7 @@ class FoodoraStream(HttpStream, ABC):
 
     def next_page_token(self, response: requests.Response) -> Optional[Mapping[str, Any]]:
         return None
+        
 
     def get_vendors(self) -> dict:
         response = requests.post(self.token_url, json={
