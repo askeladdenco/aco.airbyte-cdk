@@ -6,18 +6,11 @@ connectionSpecification:
   required:
     - username
     - password
-    - endpoint
   properties:
-    endpoint:
-      type: string
-      description: URL endpoint of the Foodora API
-      airbyte_secret: false
-
     username:
       type: string
       description: Username used to retrieve data from the Foodora API.
       airbyte_secret: true
-
     password:
       type: string
       description: Password used to retrieve data from the Foodora API.
